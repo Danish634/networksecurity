@@ -1,11 +1,28 @@
+import os
 from pymongo import MongoClient
-uri = "mongodb+srv://mohammad786danish234_db_user:Admin123@cluster0.hyzxkk8.mongodb.net/"
-client = MongoClient(uri)
+from dotenv import load_dotenv
+import certifi
+
+load_dotenv()
+
+uri = os.getenv("MONGO_DB_URL")
+
+client = None
+
 try:
+    client = MongoClient(
+        uri,
+        tlsCAFile=certifi.where(),
+        serverSelectionTimeoutMS=10000
+    )
+
     client.admin.command("ping")
-    print("Connected successfully")
-    client.close()
+
+    print("Connected successfully!")
 
 except Exception as e:
-    raise Exception(
-        "The following error occurred: ", e)
+    print("MongoDB connection failed:", e)
+
+finally:
+    if client:
+        client.close()
